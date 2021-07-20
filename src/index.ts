@@ -1,5 +1,5 @@
 export class Subscription<
-	Fn extends (...args: readonly any[]) => any = () => void,
+	Fn extends (...args: any[]) => any = () => void,
 	Meta = {}
 > {
 	private subscribers: {
@@ -27,7 +27,7 @@ export class Subscription<
 		return this.metaData;
 	};
 
-	subscribe = (fn: Fn, debuggerLabel?: string): Unsubscribe => {
+	subscribe = (fn: Fn, debuggerLabel?: string): UnsubscribeFn => {
 		this.subscribers = [...this.subscribers, { fn, label: debuggerLabel }];
 		return this.getUnsubscribeFn(fn);
 	};
@@ -39,8 +39,8 @@ export class Subscription<
 	}[] = [];
 	private planned?: number;
 
-	asyncReverseOrderSubscribe = (fn: Fn, label?: string): Unsubscribe => {
-		this.cSubscribers.push({ fn, label });
+	asyncReverseOrderSubscribe = (fn: Fn, debuggerLabel?: string): UnsubscribeFn => {
+		this.cSubscribers.push({ fn, label: debuggerLabel });
 		if (this.planned) {
 			clearTimeout(this.planned);
 		}
@@ -84,8 +84,12 @@ export class Subscription<
 	clearSubscribers = () => {
 		this.subscribers = [];
 	};
+
+	getSubscribersCount = () => {
+		return this.subscribers.length;
+	}
 }
 
-type Unsubscribe = () => void;
+export type UnsubscribeFn = () => void;
 
 export default Subscription;
